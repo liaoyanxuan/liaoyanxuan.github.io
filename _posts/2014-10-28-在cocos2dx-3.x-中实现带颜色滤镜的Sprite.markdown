@@ -13,7 +13,7 @@ cocos2dx做项目时经常会碰到要对图片进行变色的需求，最常用
 比sprite的那个fragmentShader多了一个颜色变换矩阵。shader会让图片上每个像素与颜色变换矩阵进行相乘，输出新的像素值。
 
 这个shader是这样的：
-```c++
+```Python
 	#ifdef GL_ES 
 	precision mediump float; 
 	#endif
