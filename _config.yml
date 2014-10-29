@@ -21,7 +21,9 @@ future:       true
 unpublished:  false
 
 # Conversion
-markdown: redcarpet
+markdown: redcarpet2
+redcarpet:
+extensions: ["no_intra_emphasis", "fenced_code_blocks", "autolink", "strikethrough", "superscript", "with_toc_data"]
 pygments: true
 highlighter:  pygments
 lsi:          false
