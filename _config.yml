@@ -71,25 +71,25 @@ headimg:
 #关注我
 follow:
   - class: fa-google-plus
-    url: http://www.zhanxin.info
+    url: http://www.liaoyanxuan.info
   - class: fa-facebook
-    url: http://www.zhanxin.info
+    url: http://www.liaoyanxuan.info
   - class: fa-github
     url: http://github.com/pizn
   - class: fa-weibo
     url: http://weibo.com/pizner
   - class: fa-renren
-    url: http://www.zhanxin.info
+    url: http://www.liaoyanxuan.info
   - class: fa-pinterest
-    url: http://www.zhanxin.info
+    url: http://www.liaoyanxuan.info
   - class: fa-twitter
-    url: http://www.zhanxin.info
+    url: http://www.liaoyanxuan.info
   - class: fa-rss
-    url: http://www.zhanxin.info
+    url: http://www.liaoyanxuan.info
 
 #作者信息
 author:
-  link: http://www.zhanxin.info/contact.html
+  link: http://www.liaoyanxuan.info/contact.html
   img: http://tp2.sinaimg.cn/1832671293/180/40020872447/1
 
 #评论信息
