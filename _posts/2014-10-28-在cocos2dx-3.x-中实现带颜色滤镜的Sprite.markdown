@@ -2,7 +2,6 @@
 layout: post
 title: 在cocos2dx 3.x 中实现带颜色滤镜的Sprite
 ---
-
 **一.目的**
 
 cocos2dx做项目时经常会碰到要对图片进行变色的需求，最常用的就是变灰了，就要让按钮变灰来表示当前的状态是不可点的。
@@ -12,19 +11,21 @@ cocos2dx做项目时经常会碰到要对图片进行变色的需求，最常用
 
 对图片进行颜色变换，就是对图片上的每个像素进行变换。要实现这个，要新创建一个fragmentShader，这个fragmentShader
 比sprite的那个fragmentShader多了一个颜色变换矩阵。shader会让图片上每个像素与颜色变换矩阵进行相乘，输出新的像素值。
-###这个shader是这样的：
-            #ifdef GL_ES 
-			precision mediump float; 
-	        #endif
-			uniform sampler2D u_texture; 
-			varying vec2 v_texCoord; 
-			varying vec4 v_fragmentColor; 
-			uniform mat4 fiterMat; 
-			void main(void) 
-			{ 
-				vec4 value = v_fragmentColor*texture2D(u_texture, v_texCoord); 
-				gl_FragColor = fiterMat*value; 
-			};
+
+这个shader是这样的：
+
+	#ifdef GL_ES 
+	precision mediump float; 
+	#endif
+	uniform sampler2D u_texture; 
+	varying vec2 v_texCoord; 
+	varying vec4 v_fragmentColor; 
+	uniform mat4 fiterMat; 
+	void main(void) 
+	{ 
+	   vec4 value = v_fragmentColor*texture2D(u_texture, v_texCoord); 
+	   gl_FragColor = fiterMat*value; 
+	};
 
 从shader上我们看到，“filterMat” 就是所谓的颜色变换矩阵，仅仅在原来像素输出前用它处理了一下：与待输出像素相乘。
 这个shader是opengl层级的，要应用到coco2dx引擎中，我们要着手实现cocos2dx的FilterSprite类了。
