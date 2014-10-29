@@ -14,7 +14,8 @@ cocos2dx做项目时经常会碰到要对图片进行变色的需求，最常用
 
 这个shader是这样的：
 
-```Python
+
+```c++
 	#ifdef GL_ES 
 	precision mediump float; 
 	#endif
