@@ -15,7 +15,7 @@ cocos2dx做项目时经常会碰到要对图片进行变色的需求，最常用
 这个shader是这样的：
 
 
-	```c++
+```c++
 	#ifdef GL_ES 
 	precision mediump float; 
 	#endif
@@ -28,7 +28,7 @@ cocos2dx做项目时经常会碰到要对图片进行变色的需求，最常用
 	   vec4 value = v_fragmentColor*texture2D(u_texture, v_texCoord); 
 	   gl_FragColor = fiterMat*value; 
 	};
-	```
+```
 从shader上我们看到，“filterMat” 就是所谓的颜色变换矩阵，仅仅在原来像素输出前用它处理了一下：与待输出像素相乘。
 这个shader是opengl层级的，要应用到coco2dx引擎中，我们要着手实现cocos2dx的FilterSprite类了。
 
