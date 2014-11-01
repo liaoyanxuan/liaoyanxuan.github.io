@@ -4,7 +4,7 @@
    <title>Violet</title>
    <link href="http://liaoyanxuan.github.io/atom.xml" rel="self" type="application/atom+xml"/>
    <link href="http://liaoyanxuan.github.io" rel="alternate" type="text/html" />
-   <updated>2014-11-01T13:32:33+08:00</updated>
+   <updated>2014-11-01T16:33:27+08:00</updated>
    <id>http://liaoyanxuan.github.io</id>
    <author>
      <name></name>
@@ -13,11 +13,16 @@
 
    
    <entry>
-     <title>在cocos2dx 3.x 中实现带颜色滤镜的Sprite</title>
+     <title>在cocos2dx 3.x 中实现带颜色滤镜的sprite</title>
      <link href="http://liaoyanxuan.github.io/2014/10/28/%E5%9C%A8cocos2dx-3.x-%E4%B8%AD%E5%AE%9E%E7%8E%B0%E5%B8%A6%E9%A2%9C%E8%89%B2%E6%BB%A4%E9%95%9C%E7%9A%84Sprite.html"/>
      <updated>2014-10-28T00:00:00+08:00</updated>
      <id>http://liaoyanxuan.github.io/2014/10/28/在cocos2dx-3.x-中实现带颜色滤镜的Sprite</id>
-     <content type="html">&lt;p&gt;&lt;strong&gt;一.目的&lt;/strong&gt;&lt;/p&gt;
+     <content type="html">&lt;p&gt;u---
+layout: post&lt;/p&gt;
+
+&lt;h2 id=&quot;title:-在cocos2dx-3.x-中实现带颜色滤镜的sprite&quot;&gt;title: 在cocos2dx 3.x 中实现带颜色滤镜的Sprite&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;一.目的&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;cocos2dx做项目时经常会碰到要对图片进行变色的需求，最常用的就是变灰了，就要让按钮变灰来表示当前的状态是不可点的。
 但是cocos2dx的Sprite中是没有这个变灰支持的。那么，就要我们自己动手来扩展实现一个。我们让这个带变色功能的Sprite叫做FilterSprite。这个FilterSprite扩展了Sprite的功能：可以方便地变换颜色。&lt;/p&gt;
@@ -28,14 +33,14 @@
 比sprite的那个fragmentShader多了一个颜色变换矩阵。shader会让图片上每个像素与颜色变换矩阵进行相乘，输出新的像素值。&lt;/p&gt;
 
 &lt;p&gt;这个shader是这样的：&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c++&quot; data-lang=&quot;c++&quot;&gt;    &lt;span class=&quot;cp&quot;&gt;#ifdef GL_ES &lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;precision&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mediump&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
-    &lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;endif&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;    &lt;span class=&quot;c1&quot;&gt;#ifdef GL_ES &lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;precision&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mediump&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
+    &lt;span class=&quot;c1&quot;&gt;#endif&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sampler2D&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u_texture&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
     &lt;span class=&quot;n&quot;&gt;varying&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vec2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v_texCoord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
     &lt;span class=&quot;n&quot;&gt;varying&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v_fragmentColor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
     &lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mat4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fiterMat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
-    &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; 
+    &lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; 
     &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; 
        &lt;span class=&quot;n&quot;&gt;vec4&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v_fragmentColor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;texture2D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;u_texture&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v_texCoord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; 
        &lt;span class=&quot;n&quot;&gt;gl_FragColor&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fiterMat&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 

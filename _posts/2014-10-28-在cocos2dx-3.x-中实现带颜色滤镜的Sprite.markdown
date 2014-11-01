@@ -1,4 +1,4 @@
----
+u---
 layout: post
 title: 在cocos2dx 3.x 中实现带颜色滤镜的Sprite
 ---
@@ -14,8 +14,8 @@ cocos2dx做项目时经常会碰到要对图片进行变色的需求，最常用
 
 这个shader是这样的：
 
+```ruby
 
-```c++
 	#ifdef GL_ES 
 	precision mediump float; 
 	#endif
