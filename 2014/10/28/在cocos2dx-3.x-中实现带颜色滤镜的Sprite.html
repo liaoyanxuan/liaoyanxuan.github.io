@@ -131,7 +131,7 @@ void main(void)
 <li>引擎中一个shader对应一个GLProgram，所以这个带颜色滤镜的shader（称为filterShader）对应一个GLProgram（称为filterProgram）对象，在实际使用时，是用对GLProgram进行了封装的GLProgramState（称为filterProgramState）对象，FilterSprite对象的_glProgramState要设置成filterProgramState对象，在源码中FilterSprite的initWithTexture进行这个filterShader和filterProgram的关联。</li>
 <li>在渲染时要将滤镜传递给shader程序，在源码中就是在onDraw回调时调用</li>
 </ol>
-<div class="highlight"><pre><code class="language-c++" data-lang="c++">        <span class="n">glProgramState</span><span class="o">-&gt;</span><span class="n">setUniformMat4</span><span class="p">(</span> <span class="s">&quot;fiterMat&quot;</span><span class="p">,</span><span class="n">m_uSpriteFilter</span><span class="p">)</span><span class="err">。</span>
+<div class="highlight"><pre><code class="language-c++" data-lang="c++">        <span class="n">glProgramState</span><span class="o">-&gt;</span><span class="n">setUniformMat4</span><span class="p">(</span> <span class="s">&quot;fiterMat&quot;</span><span class="p">,</span><span class="n">m_uSpriteFilter</span><span class="p">)</span>
 </code></pre></div>
 <p><strong>四.使用</strong></p>
 
