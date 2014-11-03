@@ -49,6 +49,7 @@ address,caption,cite,code,dfn,em,th,var {
     font-style:normal;
     font-weight:500;
 }
+
 ol,ul {
     list-style:none;
 }
@@ -189,6 +190,7 @@ a:hover {
     line-height: 32px;
     vertical-align: middle;
 }
+
 .nav-item a {
     display: block;
     line-height: 32px;

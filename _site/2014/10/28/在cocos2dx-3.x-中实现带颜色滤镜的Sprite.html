@@ -1,9 +1,102 @@
-<p>u---
-layout: post</p>
-
-<h2 id="title:-在cocos2dx-3.x-中实现带颜色滤镜的sprite">title: 在cocos2dx 3.x 中实现带颜色滤镜的Sprite</h2>
-
-<p><strong>一.目的</strong></p>
+<!DOCTYPE html>
+<html>
+<head>
+    <!--
+     **
+     * Author:         掌心
+     * Contact:        zhanxin.info@gmail.com
+     * Theme Name:     Violet ( Violet 主题代表着一种颜色，一种情感，还有一种美)
+     * Create Date:    2013.10
+     * Update:         2014.09
+     **
+    -->
+    <meta charset="utf-8" />
+    <title>
+        
+            在cocos2dx 3.x 中实现带颜色滤镜的Sprite
+                 
+    </title>
+    <meta name="generator" content="Jekyll" />
+    <meta name="author" content="" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <!-- //页面样式 -->
+    <link rel="stylesheet" href="/themes/violet/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/css/pygments.css" type="text/css" />
+    <link rel="alternate" type="application/atom+xml" title="Recent Entries" href="/atom.xml" />
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Spirax' rel='stylesheet' type='text/css'>
+    <link rel="shortcut icon" href="http://liaoyanxuan.github.io/themes/violet/images/favicon.ico" type="image/x-icon" />
+    <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+</head>
+<body id="violet">
+    <div class="page-wrapper">
+        <section class="head" id="violet-head">
+            <header class="header" id="violet-header">
+                <h1 class="logo"><a href="http://liaoyanxuan.github.io">Violet</a></h1>
+                <h2 class="subtitle">Just another Jekyll blog.</h2>
+            </header>
+            <nav class="nav" id="violet-nav">
+                <ul class="nav-list">
+                    
+                    
+                    
+                    <li class="nav-item ">
+                        <a href="/index.html">
+                            首页
+                        </a>
+                        
+                    </li>
+                    
+                    
+                    
+                    <li class="nav-item ">
+                        <a href="/archives.html">
+                            文章归档
+                        </a>
+                        
+                    </li>
+                    
+                    
+                    
+                    <li class="nav-item ">
+                        <a href="/works.html">
+                            作品
+                        </a>
+                        
+                    </li>
+                    
+                    
+                    
+                    <li class="nav-item ">
+                        <a href="http://liaoyanxuan.github.io/contact.html">
+                            联系我
+                        </a>
+                        
+                    </li>
+                    
+                    
+                    
+                    <li class="nav-item ">
+                        <a href="https://github.com/liaoyanxuan/liaoyanxuan.github.io">
+                            博客源代码
+                        </a>
+                        
+                    </li>
+                    
+                </ul>
+            </nav>
+        </section>
+        <section class="main" id="violet-main">
+            <article class="main-article main-article-page">
+    <div class="violet-title">
+        <h3 class="violet-title-item">在cocos2dx 3.x 中实现带颜色滤镜的Sprite</h3>
+    </div>
+    <div class="violet-post">
+        <p class="main-article-meta"><time pubdate="">2014-10-28</time></p>
+        <div class="main-article-contant">
+            <p><strong>一.目的</strong></p>
 
 <p>cocos2dx做项目时经常会碰到要对图片进行变色的需求，最常用的就是变灰了，就要让按钮变灰来表示当前的状态是不可点的。
 但是cocos2dx的Sprite中是没有这个变灰支持的。那么，就要我们自己动手来扩展实现一个。我们让这个带变色功能的Sprite叫做FilterSprite。这个FilterSprite扩展了Sprite的功能：可以方便地变换颜色。</p>
@@ -14,18 +107,18 @@ layout: post</p>
 比sprite的那个fragmentShader多了一个颜色变换矩阵。shader会让图片上每个像素与颜色变换矩阵进行相乘，输出新的像素值。</p>
 
 <p>这个shader是这样的：</p>
-<div class="highlight"><pre><code class="language-ruby" data-lang="ruby">    <span class="c1">#ifdef GL_ES </span>
-    <span class="n">precision</span> <span class="n">mediump</span> <span class="n">float</span><span class="p">;</span> 
-    <span class="c1">#endif</span>
-    <span class="n">uniform</span> <span class="n">sampler2D</span> <span class="n">u_texture</span><span class="p">;</span> 
-    <span class="n">varying</span> <span class="n">vec2</span> <span class="n">v_texCoord</span><span class="p">;</span> 
-    <span class="n">varying</span> <span class="n">vec4</span> <span class="n">v_fragmentColor</span><span class="p">;</span> 
-    <span class="n">uniform</span> <span class="n">mat4</span> <span class="n">fiterMat</span><span class="p">;</span> 
-    <span class="n">void</span> <span class="n">main</span><span class="p">(</span><span class="n">void</span><span class="p">)</span> 
-    <span class="p">{</span> 
-       <span class="n">vec4</span> <span class="n">value</span> <span class="o">=</span> <span class="n">v_fragmentColor</span><span class="o">*</span><span class="n">texture2D</span><span class="p">(</span><span class="n">u_texture</span><span class="p">,</span> <span class="n">v_texCoord</span><span class="p">);</span> 
-       <span class="n">gl_FragColor</span> <span class="o">=</span> <span class="n">fiterMat</span><span class="o">*</span><span class="n">value</span><span class="p">;</span> 
-    <span class="p">};</span>
+<div class="highlight"><pre><code class="language-text" data-lang="text">#ifdef GL_ES 
+precision mediump float; 
+#endif
+uniform sampler2D u_texture; 
+varying vec2 v_texCoord; 
+varying vec4 v_fragmentColor; 
+uniform mat4 fiterMat; 
+void main(void) 
+{ 
+   vec4 value = v_fragmentColor*texture2D(u_texture, v_texCoord); 
+   gl_FragColor = fiterMat*value; 
+};
 </code></pre></div>
 <p>从shader上我们看到，“filterMat” 就是所谓的颜色变换矩阵，仅仅在原来像素输出前用它处理了一下：与待输出像素相乘。
 这个shader是opengl层级的，要应用到coco2dx引擎中，我们要着手实现cocos2dx的FilterSprite类了。</p>
@@ -36,249 +129,342 @@ layout: post</p>
 
 <ol>
 <li>引擎中一个shader对应一个GLProgram，所以这个带颜色滤镜的shader（称为filterShader）对应一个GLProgram（称为filterProgram）对象，在实际使用时，是用对GLProgram进行了封装的GLProgramState（称为filterProgramState）对象，FilterSprite对象的_glProgramState要设置成filterProgramState对象，在源码中FilterSprite的initWithTexture进行这个filterShader和filterProgram的关联。</li>
-<li><p>在渲染时要将滤镜传递给shader程序，在源码中就是在onDraw回调时调用</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">glProgramState-&gt;setUniformMat4( &quot;fiterMat&quot;,m_uSpriteFilter)。
-</code></pre></div></li>
+<li>在渲染时要将滤镜传递给shader程序，在源码中就是在onDraw回调时调用</li>
 </ol>
-
+<div class="highlight"><pre><code class="language-c++" data-lang="c++">        <span class="n">glProgramState</span><span class="o">-&gt;</span><span class="n">setUniformMat4</span><span class="p">(</span> <span class="s">&quot;fiterMat&quot;</span><span class="p">,</span><span class="n">m_uSpriteFilter</span><span class="p">)</span><span class="err">。</span>
+</code></pre></div>
 <p><strong>四.使用</strong></p>
 
 <p>使用起来非常简单，只需要设置一个颜色矩阵，例如，如果要变灰就设置一个灰度矩阵，如果要恢复原貌就设置一个单位矩阵。</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">Sprite *_sprite1;
-_sprite1 = FilterSprite::create(&quot;Images/background3.png&quot;);
+<div class="highlight"><pre><code class="language-c++" data-lang="c++">    <span class="n">Sprite</span> <span class="o">*</span><span class="n">_sprite1</span><span class="p">;</span>
+    <span class="n">_sprite1</span> <span class="o">=</span> <span class="n">FilterSprite</span><span class="o">::</span><span class="n">create</span><span class="p">(</span><span class="s">&quot;Images/background3.png&quot;</span><span class="p">);</span>
 
-GLfloat  filterMat[16]= {
-        0.3f,  0.3f,  0.3f,  0.0f,
-        0.59f, 0.59f, 0.59f, 0.59f,
-        0.11f, 0.11f, 0.11f, 0.0f,
-        0.0f,  0.0f,  0.0f,  1.0f,
-};
+    <span class="n">GLfloat</span>  <span class="n">filterMat</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span>
+            <span class="mf">0.3f</span><span class="p">,</span>  <span class="mf">0.3f</span><span class="p">,</span>  <span class="mf">0.3f</span><span class="p">,</span>  <span class="mf">0.0f</span><span class="p">,</span>
+            <span class="mf">0.59f</span><span class="p">,</span> <span class="mf">0.59f</span><span class="p">,</span> <span class="mf">0.59f</span><span class="p">,</span> <span class="mf">0.59f</span><span class="p">,</span>
+            <span class="mf">0.11f</span><span class="p">,</span> <span class="mf">0.11f</span><span class="p">,</span> <span class="mf">0.11f</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">,</span>
+            <span class="mf">0.0f</span><span class="p">,</span>  <span class="mf">0.0f</span><span class="p">,</span>  <span class="mf">0.0f</span><span class="p">,</span>  <span class="mf">1.0f</span><span class="p">,</span>
+    <span class="p">};</span>
 
-dynamic_cast&lt;FilterSprite*&gt;(_sprite1)-&gt;setFilterMat(filterMat);
+    <span class="k">dynamic_cast</span><span class="o">&lt;</span><span class="n">FilterSprite</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">_sprite1</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">setFilterMat</span><span class="p">(</span><span class="n">filterMat</span><span class="p">);</span>
 </code></pre></div>
 <p><strong>五.源码</strong></p>
 
 <p>FilterSprite.h:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">/****************************************************************************
+<div class="highlight"><pre><code class="language-c++" data-lang="c++">    <span class="cm">/****************************************************************************</span>
 
- FilterSpirte.h
+<span class="cm">     FilterSpirte.h</span>
 
- Created by LiaoYanXuan  on 14-10-21.
- ****************************************************************************/
+<span class="cm">     Created by LiaoYanXuan  on 14-10-21.</span>
+<span class="cm">     ****************************************************************************/</span>
 
-#ifndef __FilterSpirte_h
-#define __FilterSpirte_h
+    <span class="cp">#ifndef __FilterSpirte_h</span>
+    <span class="cp">#define __FilterSpirte_h</span>
 
-#include &quot;cocos2d.h&quot;
+    <span class="cp">#include &quot;cocos2d.h&quot;</span>
 
-USING_NS_CC;
-
-
-class FilterSprite : public Sprite{
-
-public:
-
-    FilterSprite();
-    virtual ~FilterSprite();
-
-    static FilterSprite* create();
-    static FilterSprite* create(const std::string&amp; filename);
-    static FilterSprite* create(const std::string&amp; filename, const Rect&amp; rect);
+    <span class="n">USING_NS_CC</span><span class="p">;</span>
 
 
-    static FilterSprite* createWithTexture(Texture2D *pTexture);
-    static FilterSprite* createWithTexture(Texture2D *pTexture, const Rect&amp; rect, bool rotated=false);
-    static FilterSprite* createWithSpriteFrame(SpriteFrame *pSpriteFrame);
-    static FilterSprite* createWithSpriteFrameName(const std::string&amp; spriteFrameName);
+    <span class="k">class</span> <span class="nc">FilterSprite</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Sprite</span><span class="p">{</span>
 
-    bool initWithTexture(Texture2D* pTexture, const Rect&amp; tRect);
-    virtual void draw(Renderer *renderer, const Mat4 &amp;transform, uint32_t flags) override;
-    void onDraw(const Mat4 &amp;transform, uint32_t flags);
-    void setFilterMat(cocos2d::Mat4 matrixArray);
-    //to-do 提供一个设置滤镜的方法
-protected:
-    CustomCommand _customCommand;
-private:
-    cocos2d::Mat4   m_uSpriteFilter;
-};
+    <span class="k">public</span><span class="o">:</span>
 
-#endif
+        <span class="n">FilterSprite</span><span class="p">();</span>
+        <span class="k">virtual</span> <span class="o">~</span><span class="n">FilterSprite</span><span class="p">();</span>
+
+        <span class="k">static</span> <span class="n">FilterSprite</span><span class="o">*</span> <span class="nf">create</span><span class="p">();</span>
+        <span class="k">static</span> <span class="n">FilterSprite</span><span class="o">*</span> <span class="nf">create</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">filename</span><span class="p">);</span>
+        <span class="k">static</span> <span class="n">FilterSprite</span><span class="o">*</span> <span class="nf">create</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">filename</span><span class="p">,</span> <span class="k">const</span> <span class="n">Rect</span><span class="o">&amp;</span> <span class="n">rect</span><span class="p">);</span>
+
+
+        <span class="k">static</span> <span class="n">FilterSprite</span><span class="o">*</span> <span class="nf">createWithTexture</span><span class="p">(</span><span class="n">Texture2D</span> <span class="o">*</span><span class="n">pTexture</span><span class="p">);</span>
+        <span class="k">static</span> <span class="n">FilterSprite</span><span class="o">*</span> <span class="nf">createWithTexture</span><span class="p">(</span><span class="n">Texture2D</span> <span class="o">*</span><span class="n">pTexture</span><span class="p">,</span> <span class="k">const</span> <span class="n">Rect</span><span class="o">&amp;</span> <span class="n">rect</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">rotated</span><span class="o">=</span><span class="nb">false</span><span class="p">);</span>
+        <span class="k">static</span> <span class="n">FilterSprite</span><span class="o">*</span> <span class="nf">createWithSpriteFrame</span><span class="p">(</span><span class="n">SpriteFrame</span> <span class="o">*</span><span class="n">pSpriteFrame</span><span class="p">);</span>
+        <span class="k">static</span> <span class="n">FilterSprite</span><span class="o">*</span> <span class="nf">createWithSpriteFrameName</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">spriteFrameName</span><span class="p">);</span>
+
+        <span class="kt">bool</span> <span class="nf">initWithTexture</span><span class="p">(</span><span class="n">Texture2D</span><span class="o">*</span> <span class="n">pTexture</span><span class="p">,</span> <span class="k">const</span> <span class="n">Rect</span><span class="o">&amp;</span> <span class="n">tRect</span><span class="p">);</span>
+        <span class="k">virtual</span> <span class="kt">void</span> <span class="n">draw</span><span class="p">(</span><span class="n">Renderer</span> <span class="o">*</span><span class="n">renderer</span><span class="p">,</span> <span class="k">const</span> <span class="n">Mat4</span> <span class="o">&amp;</span><span class="n">transform</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">flags</span><span class="p">)</span> <span class="k">override</span><span class="p">;</span>
+        <span class="kt">void</span> <span class="nf">onDraw</span><span class="p">(</span><span class="k">const</span> <span class="n">Mat4</span> <span class="o">&amp;</span><span class="n">transform</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">flags</span><span class="p">);</span>
+        <span class="kt">void</span> <span class="nf">setFilterMat</span><span class="p">(</span><span class="n">cocos2d</span><span class="o">::</span><span class="n">Mat4</span> <span class="n">matrixArray</span><span class="p">);</span>
+        <span class="c1">//to-do 提供一个设置滤镜的方法</span>
+    <span class="k">protected</span><span class="o">:</span>
+        <span class="n">CustomCommand</span> <span class="n">_customCommand</span><span class="p">;</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="n">cocos2d</span><span class="o">::</span><span class="n">Mat4</span>   <span class="n">m_uSpriteFilter</span><span class="p">;</span>
+    <span class="p">};</span>
+
+    <span class="cp">#endif</span>
 </code></pre></div>
 <p>FilterSprite.cpp:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">/****************************************************************************
- FilterSpirte.h
+<div class="highlight"><pre><code class="language-c++" data-lang="c++">    <span class="cm">/****************************************************************************</span>
+<span class="cm">     FilterSpirte.h</span>
 
- Created by LiaoYanXuan  on 14-10-21.
- ****************************************************************************/
-#include &quot;FilterSprite.h&quot;
+<span class="cm">     Created by LiaoYanXuan  on 14-10-21.</span>
+<span class="cm">     ****************************************************************************/</span>
+    <span class="cp">#include &quot;FilterSprite.h&quot;</span>
 
-FilterSprite::FilterSprite(void)
-{
-    m_uSpriteFilter=Mat4::IDENTITY;
-}
+    <span class="n">FilterSprite</span><span class="o">::</span><span class="n">FilterSprite</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">m_uSpriteFilter</span><span class="o">=</span><span class="n">Mat4</span><span class="o">::</span><span class="n">IDENTITY</span><span class="p">;</span>
+    <span class="p">}</span>
 
-FilterSprite::~FilterSprite()
-{
+    <span class="n">FilterSprite</span><span class="o">::~</span><span class="n">FilterSprite</span><span class="p">()</span>
+    <span class="p">{</span>
 
-}
+    <span class="p">}</span>
 
-FilterSprite* FilterSprite::create()
-{
-    FilterSprite *sprite = new (std::nothrow) FilterSprite();
-    if (sprite &amp;&amp; sprite-&gt;init())
-    {
-        sprite-&gt;autorelease();
-        return sprite;
-    }
-    CC_SAFE_DELETE(sprite);
-    return nullptr;
-}
+    <span class="n">FilterSprite</span><span class="o">*</span> <span class="n">FilterSprite</span><span class="o">::</span><span class="n">create</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">FilterSprite</span> <span class="o">*</span><span class="n">sprite</span> <span class="o">=</span> <span class="k">new</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">nothrow</span><span class="p">)</span> <span class="n">FilterSprite</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sprite</span> <span class="o">&amp;&amp;</span> <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">())</span>
+        <span class="p">{</span>
+            <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">autorelease</span><span class="p">();</span>
+            <span class="k">return</span> <span class="n">sprite</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">CC_SAFE_DELETE</span><span class="p">(</span><span class="n">sprite</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span>
+    <span class="p">}</span>
 
-FilterSprite* FilterSprite::create(const std::string&amp; filename)
-{
-    FilterSprite *sprite = new (std::nothrow) FilterSprite();
-    if (sprite &amp;&amp; sprite-&gt;initWithFile(filename))
-    {
-        sprite-&gt;autorelease();
-        return sprite;
-    }
-    CC_SAFE_DELETE(sprite);
-    return nullptr;
-}
+    <span class="n">FilterSprite</span><span class="o">*</span> <span class="n">FilterSprite</span><span class="o">::</span><span class="n">create</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">FilterSprite</span> <span class="o">*</span><span class="n">sprite</span> <span class="o">=</span> <span class="k">new</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">nothrow</span><span class="p">)</span> <span class="n">FilterSprite</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sprite</span> <span class="o">&amp;&amp;</span> <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">initWithFile</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">autorelease</span><span class="p">();</span>
+            <span class="k">return</span> <span class="n">sprite</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">CC_SAFE_DELETE</span><span class="p">(</span><span class="n">sprite</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span>
+    <span class="p">}</span>
 
-FilterSprite* FilterSprite::create(const std::string&amp; filename, const Rect&amp; rect)
-{
-    FilterSprite *sprite = new (std::nothrow) FilterSprite();
-    if (sprite &amp;&amp; sprite-&gt;initWithFile(filename, rect))
-    {
-        sprite-&gt;autorelease();
-        return sprite;
-    }
-    CC_SAFE_DELETE(sprite);
-    return nullptr;
-}
+    <span class="n">FilterSprite</span><span class="o">*</span> <span class="n">FilterSprite</span><span class="o">::</span><span class="n">create</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">filename</span><span class="p">,</span> <span class="k">const</span> <span class="n">Rect</span><span class="o">&amp;</span> <span class="n">rect</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">FilterSprite</span> <span class="o">*</span><span class="n">sprite</span> <span class="o">=</span> <span class="k">new</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">nothrow</span><span class="p">)</span> <span class="n">FilterSprite</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sprite</span> <span class="o">&amp;&amp;</span> <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">initWithFile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">rect</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">autorelease</span><span class="p">();</span>
+            <span class="k">return</span> <span class="n">sprite</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">CC_SAFE_DELETE</span><span class="p">(</span><span class="n">sprite</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span>
+    <span class="p">}</span>
 
-FilterSprite* FilterSprite::createWithTexture(Texture2D *pTexture)
-{
-    FilterSprite *sprite = new (std::nothrow) FilterSprite();
-    Rect rect = Rect::ZERO;
-    rect.size = pTexture-&gt;getContentSize();
-    if (sprite &amp;&amp; sprite-&gt;initWithTexture(pTexture,rect))
-    {
-        sprite-&gt;autorelease();
-        return sprite;
-    }
-    CC_SAFE_DELETE(sprite);
-    return nullptr;
-}
+    <span class="n">FilterSprite</span><span class="o">*</span> <span class="n">FilterSprite</span><span class="o">::</span><span class="n">createWithTexture</span><span class="p">(</span><span class="n">Texture2D</span> <span class="o">*</span><span class="n">pTexture</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">FilterSprite</span> <span class="o">*</span><span class="n">sprite</span> <span class="o">=</span> <span class="k">new</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">nothrow</span><span class="p">)</span> <span class="n">FilterSprite</span><span class="p">();</span>
+        <span class="n">Rect</span> <span class="n">rect</span> <span class="o">=</span> <span class="n">Rect</span><span class="o">::</span><span class="n">ZERO</span><span class="p">;</span>
+        <span class="n">rect</span><span class="p">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">pTexture</span><span class="o">-&gt;</span><span class="n">getContentSize</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sprite</span> <span class="o">&amp;&amp;</span> <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">initWithTexture</span><span class="p">(</span><span class="n">pTexture</span><span class="p">,</span><span class="n">rect</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">autorelease</span><span class="p">();</span>
+            <span class="k">return</span> <span class="n">sprite</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">CC_SAFE_DELETE</span><span class="p">(</span><span class="n">sprite</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span>
+    <span class="p">}</span>
 
-FilterSprite* FilterSprite::createWithTexture(Texture2D *texture, const Rect&amp; rect, bool rotated)
-{
-    FilterSprite *sprite = new (std::nothrow) FilterSprite();
-    if (sprite &amp;&amp; sprite-&gt;initWithTexture(texture, rect))
-    {
-        sprite-&gt;autorelease();
-        return sprite;
-    }
-    CC_SAFE_DELETE(sprite);
-    return nullptr;
-}
+    <span class="n">FilterSprite</span><span class="o">*</span> <span class="n">FilterSprite</span><span class="o">::</span><span class="n">createWithTexture</span><span class="p">(</span><span class="n">Texture2D</span> <span class="o">*</span><span class="n">texture</span><span class="p">,</span> <span class="k">const</span> <span class="n">Rect</span><span class="o">&amp;</span> <span class="n">rect</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">rotated</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">FilterSprite</span> <span class="o">*</span><span class="n">sprite</span> <span class="o">=</span> <span class="k">new</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">nothrow</span><span class="p">)</span> <span class="n">FilterSprite</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sprite</span> <span class="o">&amp;&amp;</span> <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">initWithTexture</span><span class="p">(</span><span class="n">texture</span><span class="p">,</span> <span class="n">rect</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">autorelease</span><span class="p">();</span>
+            <span class="k">return</span> <span class="n">sprite</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">CC_SAFE_DELETE</span><span class="p">(</span><span class="n">sprite</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span>
+    <span class="p">}</span>
 
-FilterSprite* FilterSprite::createWithSpriteFrame(SpriteFrame *spriteFrame)
-{
-    FilterSprite *sprite = new (std::nothrow) FilterSprite();
-    if (sprite &amp;&amp; spriteFrame &amp;&amp; sprite-&gt;initWithSpriteFrame(spriteFrame))
-    {
-        sprite-&gt;autorelease();
-        return sprite;
-    }
-    CC_SAFE_DELETE(sprite);
-    return nullptr;
-}
+    <span class="n">FilterSprite</span><span class="o">*</span> <span class="n">FilterSprite</span><span class="o">::</span><span class="n">createWithSpriteFrame</span><span class="p">(</span><span class="n">SpriteFrame</span> <span class="o">*</span><span class="n">spriteFrame</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">FilterSprite</span> <span class="o">*</span><span class="n">sprite</span> <span class="o">=</span> <span class="k">new</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">nothrow</span><span class="p">)</span> <span class="n">FilterSprite</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sprite</span> <span class="o">&amp;&amp;</span> <span class="n">spriteFrame</span> <span class="o">&amp;&amp;</span> <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">initWithSpriteFrame</span><span class="p">(</span><span class="n">spriteFrame</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="n">sprite</span><span class="o">-&gt;</span><span class="n">autorelease</span><span class="p">();</span>
+            <span class="k">return</span> <span class="n">sprite</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">CC_SAFE_DELETE</span><span class="p">(</span><span class="n">sprite</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span>
+    <span class="p">}</span>
 
-FilterSprite* FilterSprite::createWithSpriteFrameName(const std::string&amp; spriteFrameName)
-{
-    SpriteFrame *frame = SpriteFrameCache::getInstance()-&gt;getSpriteFrameByName(spriteFrameName);
+    <span class="n">FilterSprite</span><span class="o">*</span> <span class="n">FilterSprite</span><span class="o">::</span><span class="n">createWithSpriteFrameName</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">spriteFrameName</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">SpriteFrame</span> <span class="o">*</span><span class="n">frame</span> <span class="o">=</span> <span class="n">SpriteFrameCache</span><span class="o">::</span><span class="n">getInstance</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">getSpriteFrameByName</span><span class="p">(</span><span class="n">spriteFrameName</span><span class="p">);</span>
 
-#if COCOS2D_DEBUG &gt; 0
-    char msg[256] = {0};
-    sprintf(msg, &quot;Invalid spriteFrameName: %s&quot;, spriteFrameName.c_str());
-    CCASSERT(frame != nullptr, msg);
-#endif
+    <span class="cp">#if COCOS2D_DEBUG &gt; 0</span>
+        <span class="kt">char</span> <span class="n">msg</span><span class="p">[</span><span class="mi">256</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+        <span class="n">sprintf</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s">&quot;Invalid spriteFrameName: %s&quot;</span><span class="p">,</span> <span class="n">spriteFrameName</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+        <span class="n">CCASSERT</span><span class="p">(</span><span class="n">frame</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="cp">#endif</span>
 
-    return createWithSpriteFrame(frame);
-}
+        <span class="k">return</span> <span class="nf">createWithSpriteFrame</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
+    <span class="p">}</span>
 
-bool FilterSprite::initWithTexture(Texture2D* pTexture, const Rect&amp; tRect){
-    do{
-        CC_BREAK_IF(!Sprite::initWithTexture(pTexture, tRect));
+    <span class="kt">bool</span> <span class="n">FilterSprite</span><span class="o">::</span><span class="n">initWithTexture</span><span class="p">(</span><span class="n">Texture2D</span><span class="o">*</span> <span class="n">pTexture</span><span class="p">,</span> <span class="k">const</span> <span class="n">Rect</span><span class="o">&amp;</span> <span class="n">tRect</span><span class="p">){</span>
+        <span class="k">do</span><span class="p">{</span>
+            <span class="n">CC_BREAK_IF</span><span class="p">(</span><span class="o">!</span><span class="n">Sprite</span><span class="o">::</span><span class="n">initWithTexture</span><span class="p">(</span><span class="n">pTexture</span><span class="p">,</span> <span class="n">tRect</span><span class="p">));</span>
 
-        GLchar* pszFragSource =
-            &quot;#ifdef GL_ES \n \
-            precision mediump float; \n \
-            #endif \n \
-            uniform sampler2D u_texture; \n \
-            varying vec2 v_texCoord; \n \
-            varying vec4 v_fragmentColor; \n \
-            uniform mat4 fiterMat; \n \
-            void main(void) \n \
-            { \n \
-            vec4 value = v_fragmentColor*texture2D(u_texture, v_texCoord); \n \
-            gl_FragColor = fiterMat*value; \n \
-            }&quot;;
+            <span class="n">GLchar</span><span class="o">*</span> <span class="n">pszFragSource</span> <span class="o">=</span>
+                <span class="s">&quot;#ifdef GL_ES </span><span class="se">\n</span><span class="s"> \</span>
+<span class="s">                precision mediump float; </span><span class="se">\n</span><span class="s"> \</span>
+<span class="s">                #endif </span><span class="se">\n</span><span class="s"> \</span>
+<span class="s">                uniform sampler2D u_texture; </span><span class="se">\n</span><span class="s"> \</span>
+<span class="s">                varying vec2 v_texCoord; </span><span class="se">\n</span><span class="s"> \</span>
+<span class="s">                varying vec4 v_fragmentColor; </span><span class="se">\n</span><span class="s"> \</span>
+<span class="s">                uniform mat4 fiterMat; </span><span class="se">\n</span><span class="s"> \</span>
+<span class="s">                void main(void) </span><span class="se">\n</span><span class="s"> \</span>
+<span class="s">                { </span><span class="se">\n</span><span class="s"> \</span>
+<span class="s">                vec4 value = v_fragmentColor*texture2D(u_texture, v_texCoord); </span><span class="se">\n</span><span class="s"> \</span>
+<span class="s">                gl_FragColor = fiterMat*value; </span><span class="se">\n</span><span class="s"> \</span>
+<span class="s">                }&quot;</span><span class="p">;</span>
 
-         auto glprogram = GLProgram::createWithByteArrays(ccPositionTextureColor_vert, pszFragSource);
-         auto glprogramstate = GLProgramState::getOrCreateWithGLProgram(glprogram);
-         setGLProgramState(glprogramstate);
+             <span class="k">auto</span> <span class="n">glprogram</span> <span class="o">=</span> <span class="n">GLProgram</span><span class="o">::</span><span class="n">createWithByteArrays</span><span class="p">(</span><span class="n">ccPositionTextureColor_vert</span><span class="p">,</span> <span class="n">pszFragSource</span><span class="p">);</span>
+             <span class="k">auto</span> <span class="n">glprogramstate</span> <span class="o">=</span> <span class="n">GLProgramState</span><span class="o">::</span><span class="n">getOrCreateWithGLProgram</span><span class="p">(</span><span class="n">glprogram</span><span class="p">);</span>
+             <span class="n">setGLProgramState</span><span class="p">(</span><span class="n">glprogramstate</span><span class="p">);</span>
 
-         CHECK_GL_ERROR_DEBUG();
+             <span class="n">CHECK_GL_ERROR_DEBUG</span><span class="p">();</span>
 
-         return true;
-    } while (0);
-    return false;
-}
+             <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="p">}</span>
 
-void  FilterSprite::setFilterMat(cocos2d::Mat4 matrixArray)
-{
-    m_uSpriteFilter=matrixArray;
-}
+    <span class="kt">void</span>  <span class="n">FilterSprite</span><span class="o">::</span><span class="n">setFilterMat</span><span class="p">(</span><span class="n">cocos2d</span><span class="o">::</span><span class="n">Mat4</span> <span class="n">matrixArray</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">m_uSpriteFilter</span><span class="o">=</span><span class="n">matrixArray</span><span class="p">;</span>
+    <span class="p">}</span>
 
-void FilterSprite::draw(Renderer *renderer, const Mat4 &amp;transform, uint32_t flags)
-{
-    _customCommand.init(_globalZOrder);
-    _customCommand.func = CC_CALLBACK_0(FilterSprite::onDraw, this, transform, flags);
-    renderer-&gt;addCommand(&amp;_customCommand);
-}
+    <span class="kt">void</span> <span class="n">FilterSprite</span><span class="o">::</span><span class="n">draw</span><span class="p">(</span><span class="n">Renderer</span> <span class="o">*</span><span class="n">renderer</span><span class="p">,</span> <span class="k">const</span> <span class="n">Mat4</span> <span class="o">&amp;</span><span class="n">transform</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">flags</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_customCommand</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="n">_globalZOrder</span><span class="p">);</span>
+        <span class="n">_customCommand</span><span class="p">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">CC_CALLBACK_0</span><span class="p">(</span><span class="n">FilterSprite</span><span class="o">::</span><span class="n">onDraw</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
+        <span class="n">renderer</span><span class="o">-&gt;</span><span class="n">addCommand</span><span class="p">(</span><span class="o">&amp;</span><span class="n">_customCommand</span><span class="p">);</span>
+    <span class="p">}</span>
 
-void FilterSprite::onDraw(const Mat4 &amp;transform, uint32_t flags)
-{
-     auto glProgramState = getGLProgramState();
-     glProgramState-&gt;setUniformMat4(&quot;fiterMat&quot;,m_uSpriteFilter);
-     glProgramState-&gt;apply(transform);
+    <span class="kt">void</span> <span class="n">FilterSprite</span><span class="o">::</span><span class="n">onDraw</span><span class="p">(</span><span class="k">const</span> <span class="n">Mat4</span> <span class="o">&amp;</span><span class="n">transform</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">flags</span><span class="p">)</span>
+    <span class="p">{</span>
+         <span class="k">auto</span> <span class="n">glProgramState</span> <span class="o">=</span> <span class="n">getGLProgramState</span><span class="p">();</span>
+         <span class="n">glProgramState</span><span class="o">-&gt;</span><span class="n">setUniformMat4</span><span class="p">(</span><span class="s">&quot;fiterMat&quot;</span><span class="p">,</span><span class="n">m_uSpriteFilter</span><span class="p">);</span>
+         <span class="n">glProgramState</span><span class="o">-&gt;</span><span class="n">apply</span><span class="p">(</span><span class="n">transform</span><span class="p">);</span>
 
-    GL::blendFunc( _blendFunc.src, _blendFunc.dst );
+        <span class="n">GL</span><span class="o">::</span><span class="n">blendFunc</span><span class="p">(</span> <span class="n">_blendFunc</span><span class="p">.</span><span class="n">src</span><span class="p">,</span> <span class="n">_blendFunc</span><span class="p">.</span><span class="n">dst</span> <span class="p">);</span>
 
-    GL::bindTexture2D( _texture-&gt;getName() );
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX );
+        <span class="n">GL</span><span class="o">::</span><span class="n">bindTexture2D</span><span class="p">(</span> <span class="n">_texture</span><span class="o">-&gt;</span><span class="n">getName</span><span class="p">()</span> <span class="p">);</span>
+        <span class="n">GL</span><span class="o">::</span><span class="n">enableVertexAttribs</span><span class="p">(</span> <span class="n">GL</span><span class="o">::</span><span class="n">VERTEX_ATTRIB_FLAG_POS_COLOR_TEX</span> <span class="p">);</span>
 
-#define kQuadSize sizeof(_quad.bl)
-    size_t offset = (size_t)&amp;_quad;
+    <span class="cp">#define kQuadSize sizeof(_quad.bl)</span>
+        <span class="kt">size_t</span> <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="o">&amp;</span><span class="n">_quad</span><span class="p">;</span>
 
-    // vertex
-    int diff = offsetof( V3F_C4B_T2F, vertices);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, kQuadSize, (void*) (offset + diff));
+        <span class="c1">// vertex</span>
+        <span class="kt">int</span> <span class="n">diff</span> <span class="o">=</span> <span class="n">offsetof</span><span class="p">(</span> <span class="n">V3F_C4B_T2F</span><span class="p">,</span> <span class="n">vertices</span><span class="p">);</span>
+        <span class="n">glVertexAttribPointer</span><span class="p">(</span><span class="n">GLProgram</span><span class="o">::</span><span class="n">VERTEX_ATTRIB_POSITION</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">GL_FLOAT</span><span class="p">,</span> <span class="n">GL_FALSE</span><span class="p">,</span> <span class="n">kQuadSize</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span> <span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="n">diff</span><span class="p">));</span>
 
-    // texCoods
-    diff = offsetof( V3F_C4B_T2F, texCoords);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, kQuadSize, (void*)(offset + diff));
+        <span class="c1">// texCoods</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">offsetof</span><span class="p">(</span> <span class="n">V3F_C4B_T2F</span><span class="p">,</span> <span class="n">texCoords</span><span class="p">);</span>
+        <span class="n">glVertexAttribPointer</span><span class="p">(</span><span class="n">GLProgram</span><span class="o">::</span><span class="n">VERTEX_ATTRIB_TEX_COORD</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">GL_FLOAT</span><span class="p">,</span> <span class="n">GL_FALSE</span><span class="p">,</span> <span class="n">kQuadSize</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)(</span><span class="n">offset</span> <span class="o">+</span> <span class="n">diff</span><span class="p">));</span>
 
-    // color
-    diff = offsetof( V3F_C4B_T2F, colors);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, kQuadSize, (void*)(offset + diff));
+        <span class="c1">// color</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">offsetof</span><span class="p">(</span> <span class="n">V3F_C4B_T2F</span><span class="p">,</span> <span class="n">colors</span><span class="p">);</span>
+        <span class="n">glVertexAttribPointer</span><span class="p">(</span><span class="n">GLProgram</span><span class="o">::</span><span class="n">VERTEX_ATTRIB_COLOR</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">GL_UNSIGNED_BYTE</span><span class="p">,</span> <span class="n">GL_TRUE</span><span class="p">,</span> <span class="n">kQuadSize</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)(</span><span class="n">offset</span> <span class="o">+</span> <span class="n">diff</span><span class="p">));</span>
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        <span class="n">glDrawArrays</span><span class="p">(</span><span class="n">GL_TRIANGLE_STRIP</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
 
-    CHECK_GL_ERROR_DEBUG();
-    CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,4);
-}
+        <span class="n">CHECK_GL_ERROR_DEBUG</span><span class="p">();</span>
+        <span class="n">CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span>
+    <span class="p">}</span>
 </code></pre></div>
+        </div>
+    </div>
+</article>
+<nav class="pagination fn-clear" id="violet-paging">
+    <div class="pagination-list">
+        
+        <a class="prev" href="/2014/09/13/violet-update.html" rel="bookmark"><i class="fa fa-chevron-circle-left"></i>Violet 主题更新</a>
+        
+        
+    </div>
+</nav>
+<div class="comment">
+    
+        
+        <div class="comment-cnt">
+            <div class="ds-thread"></div>
+        </div>
+        
+    
+</div>
+
+        </section>
+        <footer class="foot" id="violet-foot">
+            <div class="footer fn-clear">
+                <h1 class="logo">Violet</h1>
+            </div>
+            <div class="copyright">
+                <div class="copyright-cnt fn-clear">
+                    
+                    <a class="follow" href="http://www.liaoyanxuan.info" target="_blank"><i class="fa fa-google-plus"></i></a>
+                    
+                    <a class="follow" href="http://www.liaoyanxuan.info" target="_blank"><i class="fa fa-facebook"></i></a>
+                    
+                    <a class="follow" href="http://github.com/pizn" target="_blank"><i class="fa fa-github"></i></a>
+                    
+                    <a class="follow" href="http://weibo.com/pizner" target="_blank"><i class="fa fa-weibo"></i></a>
+                    
+                    <a class="follow" href="http://www.liaoyanxuan.info" target="_blank"><i class="fa fa-renren"></i></a>
+                    
+                    <a class="follow" href="http://www.liaoyanxuan.info" target="_blank"><i class="fa fa-pinterest"></i></a>
+                    
+                    <a class="follow" href="http://www.liaoyanxuan.info" target="_blank"><i class="fa fa-twitter"></i></a>
+                    
+                    <a class="follow" href="http://www.liaoyanxuan.info" target="_blank"><i class="fa fa-rss"></i></a>
+                    
+                    <p class="text">© 2013 Violet Jekyll Theme.Design by <a href="http://www.zhanxin.info">zhanxin.lin</a></p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script type="text/javascript" src="http://liaoyanxuan.github.io/themes/violet/js/jquery-1.8.3.js"></script>
+    <script type="text/javascript" src="http://liaoyanxuan.github.io/themes/violet/js/jquery-scrollTo.js"></script>
+    <script type="text/javascript" src="http://liaoyanxuan.github.io/themes/violet/js/common.js"></script>
+    <script type="text/javascript">
+        var headImgArr = [];
+        
+            headImgArr.push("/themes/violet/images/hdbg01.jpg");
+        
+            headImgArr.push("/themes/violet/images/hdbg02.jpg");
+        
+            headImgArr.push("/themes/violet/images/hdbg03.jpg");
+        
+            headImgArr.push("/themes/violet/images/hdbg04.jpg");
+        
+        if(headImgArr.length <= 0) {
+            headImgArr = ["/themes/violet/images/hdbg03.jpg"];
+            var item = 0;
+        } else {
+            var item = Math.floor(Math.random() * (headImgArr.length));
+        }
+        $("#violet-head").css({
+            "background-image": "url(" + headImgArr[item] + ")"
+        });
+    </script>
+    
+        
+            
+            <script type="text/javascript">
+                var duoshuoQuery = {short_name:"zhanxin"};
+                (function() {
+                    var ds = document.createElement('script');
+                    ds.type = 'text/javascript';ds.async = true;
+                    ds.src = 'http://static.duoshuo.com/embed.js';
+                    ds.charset = 'UTF-8';
+                    (document.getElementsByTagName('head')[0]
+                    || document.getElementsByTagName('body')[0]).appendChild(ds);
+                })();
+            </script>
+            
+        
+    
+</body>
+</html>
