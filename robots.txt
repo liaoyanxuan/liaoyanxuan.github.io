@@ -1,9 +1,6 @@
----
-layout: blank
----
 User-agent: *
 Disallow: /css/
 Disallow: /js/
 Disallow: /works/
 
-Sitemap: {{ site.url }}/sitemap.xml
+Sitemap: http://liaoyanxuan.github.io/sitemap.xml
