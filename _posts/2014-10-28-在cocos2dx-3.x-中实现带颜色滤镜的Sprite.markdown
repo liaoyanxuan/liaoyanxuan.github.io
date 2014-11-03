@@ -38,7 +38,7 @@ cocos2dx做项目时经常会碰到要对图片进行变色的需求，最常用
 2. 在渲染时要将滤镜传递给shader程序，在源码中就是在onDraw回调时调用
 
 ```c++
-		glProgramState->setUniformMat4( "fiterMat",m_uSpriteFilter)。
+		glProgramState->setUniformMat4( "fiterMat",m_uSpriteFilter)
 ```   
 
 
